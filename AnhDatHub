@@ -1,0 +1,162 @@
+-- GUI đẹp hơn cho AnhDatHub
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+-- ScreenGui
+local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+ScreenGui.Name = "AnhDatHub"
+ScreenGui.ResetOnSpawn = false
+
+-- Nút mở menu
+local OpenButton = Instance.new("TextButton")
+OpenButton.Size = UDim2.new(0, 140, 0, 45)
+OpenButton.Position = UDim2.new(0, 20, 0.5, -22)
+OpenButton.Text = "AnhDatHub"
+OpenButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.Font = Enum.Font.GothamBold
+OpenButton.TextSize = 16
+OpenButton.AutoButtonColor = false
+OpenButton.Parent = ScreenGui
+
+-- Bo góc nút
+local openCorner = Instance.new("UICorner", OpenButton)
+openCorner.CornerRadius = UDim.new(0, 10)
+
+-- Frame chính
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 320, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -160)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Visible = false
+MainFrame.Parent = ScreenGui
+
+local frameCorner = Instance.new("UICorner", MainFrame)
+frameCorner.CornerRadius = UDim.new(0, 12)
+
+-- Toggle mở menu
+local menuOpen = false
+local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
+OpenButton.MouseEnter:Connect(function()
+	OpenButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+end)
+OpenButton.MouseLeave:Connect(function()
+	OpenButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+end)
+
+OpenButton.MouseButton1Click:Connect(function()
+	menuOpen = not menuOpen
+	if menuOpen then
+		MainFrame.Visible = true
+		MainFrame.Size = UDim2.new(0, 0, 0, 0)
+		local tween = TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, 320, 0, 320)})
+		tween:Play()
+	else
+		MainFrame.Visible = false
+	end
+end)
+
+-- Hàm tạo nút
+local function createButton(name, positionY)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0, 280, 0, 35)
+	button.Position = UDim2.new(0, 20, 0, positionY)
+	button.Text = name
+	button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	button.TextColor3 = Color3.new(1,1,1)
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 14
+	button.AutoButtonColor = false
+	button.Parent = MainFrame
+
+	local corner = Instance.new("UICorner", button)
+	corner.CornerRadius = UDim.new(0, 8)
+
+	button.MouseEnter:Connect(function()
+		button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	end)
+	button.MouseLeave:Connect(function()
+		button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	end)
+
+	return button
+end
+
+-- Trạng thái
+local jumpHigh = false
+local speedOn = false
+local noclipOn = false
+local espOn = false
+
+-- Các nút
+local JumpButton = createButton("Nhảy Cao: TẮT", 20)
+local SpeedButton = createButton("Chạy Nhanh: TẮT", 65)
+local NoclipButton = createButton("Noclip: TẮT", 110)
+local ESPButton = createButton("ESP: TẮT", 155)
+local KickButton = createButton("Nhận 1 Tỉ Robux", 200)
+
+-- Nhảy cao
+JumpButton.MouseButton1Click:Connect(function()
+	jumpHigh = not jumpHigh
+	JumpButton.Text = "Nhảy Cao: " .. (jumpHigh and "BẬT" or "TẮT")
+	humanoid.JumpPower = jumpHigh and 150 or 50
+end)
+
+-- Chạy nhanh
+SpeedButton.MouseButton1Click:Connect(function()
+	speedOn = not speedOn
+	SpeedButton.Text = "Chạy Nhanh: " .. (speedOn and "BẬT" or "TẮT")
+	humanoid.WalkSpeed = speedOn and 100 or 16
+end)
+
+-- Noclip
+RunService.Stepped:Connect(function()
+	if noclipOn and player.Character then
+		for _, part in pairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+NoclipButton.MouseButton1Click:Connect(function()
+	noclipOn = not noclipOn
+	NoclipButton.Text = "Noclip: " .. (noclipOn and "BẬT" or "TẮT")
+end)
+
+-- ESP
+ESPButton.MouseButton1Click:Connect(function()
+	espOn = not espOn
+	ESPButton.Text = "ESP: " .. (espOn and "BẬT" or "TẮT")
+
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
+			local existingESP = plr.Character.Head:FindFirstChild("AnhDat_ESP")
+			if existingESP then existingESP:Destroy() end
+
+			if espOn then
+				local billboard = Instance.new("BillboardGui", plr.Character.Head)
+				billboard.Name = "AnhDat_ESP"
+				billboard.Size = UDim2.new(0, 100, 0, 40)
+				billboard.AlwaysOnTop = true
+				local text = Instance.new("TextLabel", billboard)
+				text.Size = UDim2.new(1, 0, 1, 0)
+				text.Text = plr.Name
+				text.BackgroundTransparency = 1
+				text.TextColor3 = Color3.fromRGB(255, 50, 50)
+				text.Font = Enum.Font.GothamBold
+				text.TextScaled = true
+			end
+		end
+	end
+end)
+
+-- Nhận 1 Tỉ Robux
+KickButton.MouseButton1Click:Connect(function()
+	player:Kick("Có Cái Lồn Nhé Thằng Ngu, Anh Đạt Bá VL")
+end)
