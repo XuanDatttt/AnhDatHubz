@@ -1,0 +1,138 @@
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "AnhDatBaRoUI"
+
+-- Nút mở menu
+local openButton = Instance.new("TextButton", gui)
+openButton.Size = UDim2.new(0, 150, 0, 40)
+openButton.Position = UDim2.new(0, 20, 0.5, -20)
+openButton.Text = "AnhDatHub"
+openButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+openButton.TextColor3 = Color3.new(1, 1, 1)
+openButton.Font = Enum.Font.GothamBold
+openButton.TextSize = 16
+
+-- GUI chính (ẩn ban đầu)
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 300, 0, 300)
+frame.Position = UDim2.new(0.5, -150, 0.5, -150)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.Visible = false
+
+-- Tiêu đề
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "Anh Đạt Bá Rõ"
+title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+
+-- Viền 7 màu
+local border = Instance.new("UIStroke", frame)
+border.Thickness = 4
+
+-- Hàm đổi màu viền (rainbow loop)
+task.spawn(function()
+	local hue = 0
+	while true do
+		hue = (hue + 0.01) % 1
+		border.Color = ColorSequence.new(Color3.fromHSV(hue, 1, 1))
+		task.wait(0.03)
+	end
+end)
+
+-- Thêm khả năng di chuyển GUI
+local dragging = false
+local dragInput, dragStart, startPos
+local function update(input)
+	local delta = input.Position - dragStart
+	frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+		input.Changed:Connect(function()
+			if not dragging then return end
+			update(input)
+		end)
+	end
+end)
+
+frame.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+-- Nút đóng GUI
+local closeButton = Instance.new("TextButton", frame)
+closeButton.Size = UDim2.new(0, 50, 0, 30)
+closeButton.Position = UDim2.new(1, -50, 0, 0)
+closeButton.Text = "Đóng"
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.Font = Enum.Font.Gotham
+closeButton.TextSize = 14
+closeButton.MouseButton1Click:Connect(function()
+	frame.Visible = false
+end)
+
+-- Chức năng nhảy cao
+local jumpOn = false
+local jumpBtn = Instance.new("TextButton", frame)
+jumpBtn.Size = UDim2.new(0, 250, 0, 40)
+jumpBtn.Position = UDim2.new(0, 20, 0, 80)
+jumpBtn.Text = "Nhảy Cao: OFF"
+jumpBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+jumpBtn.TextColor3 = Color3.new(1, 1, 1)
+jumpBtn.Font = Enum.Font.GothamBold
+jumpBtn.TextSize = 16
+
+jumpBtn.MouseButton1Click:Connect(function()
+	jumpOn = not jumpOn
+	jumpBtn.Text = "Nhảy Cao: " .. (jumpOn and "ON" or "OFF")
+	humanoid.JumpPower = jumpOn and math.clamp(150, 50, 200) or 50 -- Giới hạn JumpPower
+end)
+
+-- Chức năng chạy nhanh
+local speedOn = false
+local speedBtn = Instance.new("TextButton", frame)
+speedBtn.Size = UDim2.new(0, 250, 0, 40)
+speedBtn.Position = UDim2.new(0, 20, 0, 130)
+speedBtn.Text = "Chạy Nhanh: OFF"
+speedBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+speedBtn.TextColor3 = Color3.new(1, 1, 1)
+speedBtn.Font = Enum.Font.GothamBold
+speedBtn.TextSize = 16
+
+speedBtn.MouseButton1Click:Connect(function()
+	speedOn = not speedOn
+	speedBtn.Text = "Chạy Nhanh: " .. (speedOn and "ON" or "OFF")
+	humanoid.WalkSpeed = speedOn and math.clamp(50, 16, 100) or 16 -- Giới hạn WalkSpeed
+end)
+
+-- Chức năng Kick Tất Cả (Chỉ kick người bấm nút)
+local kickBtn = Instance.new("TextButton", frame)
+kickBtn.Size = UDim2.new(0, 250, 0, 40)
+kickBtn.Position = UDim2.new(0, 20, 0, 180)
+kickBtn.Text = "Kill Tất Cả"
+kickBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+kickBtn.TextColor3 = Color3.new(1, 1, 1)
+kickBtn.Font = Enum.Font.GothamBold
+kickBtn.TextSize = 16
+
+kickBtn.MouseButton1Click:Connect(function()
+	-- Kick chính người nhấn nút
+	player:Kick("Bạn Quá Ngu Lồn Haha Anh Đạt Bá VL.")
+end)
+
+-- Sự kiện khi bấm nút mở GUI
+openButton.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+end)
